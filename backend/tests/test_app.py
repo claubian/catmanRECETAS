@@ -1,4 +1,8 @@
+import os
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -125,6 +129,52 @@ class ApiTests(unittest.TestCase):
             },
         )
         self.assertEqual(response.status_code, 422)
+
+
+class FrontendTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.dist = Path(self.directory.name)
+        (self.dist / "index.html").write_text("<html>Recetas.BI</html>", encoding="utf-8")
+        (self.dist / "assets").mkdir()
+        (self.dist / "assets" / "app.js").write_text("console.log('recetas');", encoding="utf-8")
+        with patch.dict(os.environ, {"WEB_DIST_DIR": str(self.dist)}):
+            self.client = TestClient(create_app(FakeRepository()))
+
+    def test_frontend_and_direct_navigation_return_index(self):
+        for path in ("/", "/simulador", "/alertas", "/carga-masiva"):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("text/html", response.headers["content-type"])
+                self.assertEqual(response.text, "<html>Recetas.BI</html>")
+                self.assertEqual(response.headers["cache-control"], "no-cache")
+
+    def test_assets_and_api_remain_available(self):
+        response = self.client.get("/assets/app.js")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, "console.log('recetas');")
+        self.assertEqual(self.client.get("/api/health").json()["status"], "ok")
+        self.assertEqual(self.client.get("/api/recetas").json()[0]["resumen"]["id_receta"], 40710)
+
+    def test_missing_routes_do_not_return_spa_html(self):
+        for path in ("/api/missing", "/assets/missing.js", "/missing"):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 404)
+                self.assertNotIn("<html>", response.text)
+
+    def test_invalid_frontend_directory_fails_at_startup(self):
+        with patch.dict(os.environ, {"WEB_DIST_DIR": str(self.dist / "missing")}):
+            with self.assertRaisesRegex(RuntimeError, "WEB_DIST_DIR"):
+                create_app(FakeRepository())
+
+    def test_without_frontend_configuration_api_only_behavior_is_preserved(self):
+        with patch.dict(os.environ, {"WEB_DIST_DIR": ""}):
+            client = TestClient(create_app(FakeRepository()))
+        self.assertEqual(client.get("/").status_code, 404)
+        self.assertEqual(client.get("/api/health").status_code, 200)
 
 
 if __name__ == "__main__":

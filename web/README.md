@@ -1,15 +1,15 @@
 # Recetas.BI — Frontend
 
-React + Vite, mismo patrón que `catman-app`. Consume datos de prueba
-(`mockClient.js`) por defecto — no necesita backend ni BigQuery para
-# Recetas.BI
-
 Frontend React/Vite conectado a la API FastAPI en `../backend`. La API lee las
 vistas y tablas materializadas del modelo BigQuery; React no recibe credenciales.
+El cliente real es el predeterminado.
+
+En Cloud Run, FastAPI sirve el build de Vite y la API desde el mismo origen,
+protegidos por IAP. Ver la [guia de despliegue](../README.md).
 
 ## Arranque local en Windows
 
-Terminal 1, API (desde `recetas-app`):
+Terminal 1, API (desde `catmanRECETAS`):
 
 ```powershell
 cd backend
@@ -22,7 +22,7 @@ $env:BQ_LOCATION = "US"
 uvicorn app:app --reload --port 8000
 ```
 
-Terminal 2, frontend (desde `recetas-app`):
+Terminal 2, frontend (desde `catmanRECETAS`):
 
 ```powershell
 cd web
@@ -55,4 +55,3 @@ el repo. Comprueba `/api/health/bigquery` o el indicador de conexión al pie de 
 Para activar fixtures explícitamente, establece `VITE_USE_MOCK=true` en
 `.env.local`. El modo real es el predeterminado. Las fixtures históricas son
 datos de demostración y no representan los resultados actuales de BigQuery.
-- Definir autenticación (login corporativo) antes de exponerlo fuera de

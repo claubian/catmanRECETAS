@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!backend/
+!backend/app.py
+!backend/requirements.txt
+!web/
+!web/package.json
+!web/package-lock.json
+!web/index.html
+!web/vite.config.js
+!web/src/
+!web/src/**

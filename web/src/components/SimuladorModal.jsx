@@ -284,6 +284,11 @@ export default function SimuladorModal({ pmmList, categorias, onClose, onCreated
           {tieneDraft && <span style={{ color: "var(--draft)" }}>⚠ Contiene insumos sin registrar en PMM</span>}
         </div>
 
+        <div className="info-note warn">
+          Borrador temporal: se comparte con los usuarios de esta instancia y puede perderse
+          al reiniciar o actualizar el servicio. No modifica los costos oficiales.
+        </div>
+
         <div className="modal-actions">
           <span className="nr-error">{error}</span>
           <div style={{ display: "flex", gap: 8 }}>
