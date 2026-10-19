@@ -1,0 +1,186 @@
+// Fixtures de demostración sin conexión. No representan el estado actual de BigQuery.
+
+export const PMM_INGREDIENTES = [
+  { sku: "04009008", nombre: "Levadura Panadería Materia Prima", costo_kg: 1292.30, uom: "kg" },
+  { sku: "20119422", nombre: "Mejorador RS Hallulla 1.2", costo_kg: 1506.00, uom: "kg" },
+  { sku: "20206414", nombre: "Agua Prod. Pastelería", costo_kg: 0, uom: "l" },
+  { sku: "20369425", nombre: "Harina Hallullera 25 KG", costo_kg: 536.00, uom: "kg" },
+  { sku: "20405518", nombre: "Manteca Prod. Panadería", costo_kg: 1773.00, uom: "kg" },
+  { sku: "MP-005", nombre: "Azúcar", costo_kg: 900.00, uom: "kg" },
+  { sku: "MP-006", nombre: "Huevo", costo_kg: 180.00, uom: "unid" },
+  { sku: "MP-011", nombre: "Mantequilla", costo_kg: 4200.00, uom: "kg" },
+];
+
+export const RECETAS_INICIALES = [
+  {
+    resumen: {
+      id_receta: 40710, cod_sku_receta: "06600035", desc_receta: "HALLULLA",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PANAD", desc_tema: "Panadería",
+      costo_mp_total: 34917.30, rendimiento_cantidad: 66.8, rendimiento_uom: "KG",
+      porciones_cantidad: 750, porciones_teoricas: 742.22,
+      costo_mp_por_kg: 522.71, unidad_venta: "KG", costo_mp_unidad_venta: 522.71,
+      periodo_malificacion: null, costo_malificacion_kg: null, peso_kg_unidad_venta: 1,
+      costo_malificacion_unidad: null,
+      costo_final_unidad: null, precio_venta_bruto: 1990.0, precio_venta_neto: 1672.27,
+      margen_mp_pct: 0.6874, margen_final_pct: null,
+      componentes_total: 5, componentes_sin_costo: 0,
+      estado_calidad: "SIN_MALIFICACION", margen_minimo_oficial: 0.30, bajo_margen_minimo: null,
+      variacion_mp_monto: 0, variacion_mp_pct: 0, impacto_margen_pp: 0, origen: "PMM",
+    },
+    detalle: [
+      { cod_sku_ingrediente: "04009008", desc_ingrediente: "Levadura Panadería Materia Prima", cantidad: 2, uom_receta: "UN", costo_componente: 1292.30, origen: "PMM" },
+      { cod_sku_ingrediente: "20119422", desc_ingrediente: "Mejorador RS Hallulla 1.2", cantidad: 1, uom_receta: "UN", costo_componente: 1506.00, origen: "PMM" },
+      { cod_sku_ingrediente: "20206414", desc_ingrediente: "Agua Prod. Pastelería", cantidad: 19, uom_receta: "LT", costo_componente: 0.0, origen: "PMM" },
+      { cod_sku_ingrediente: "20369425", desc_ingrediente: "Harina Hallullera 25 KG", cantidad: 2, uom_receta: "UN", costo_componente: 26800.0, origen: "PMM" },
+      { cod_sku_ingrediente: "20405518", desc_ingrediente: "Manteca Prod. Panadería", cantidad: 3, uom_receta: "UN", costo_componente: 5319.0, origen: "PMM" },
+    ],
+    alertas: [{ tipo_alerta: "SIN_MALIFICACION", detalle: "No existe cierre de malificación cargado" }],
+  },
+
+  {
+    resumen: {
+      id_receta: 91001, cod_sku_receta: "PAN-1001", desc_receta: "MARRAQUETA TRADICIONAL",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PANAD", desc_tema: "Panadería",
+      costo_mp_total: 318.0, rendimiento_cantidad: 1.0, rendimiento_uom: "KG",
+      porciones_cantidad: 1, porciones_teoricas: 1,
+      costo_mp_por_kg: 318.0, unidad_venta: "KG", costo_mp_unidad_venta: 318.0,
+      periodo_malificacion: "2026-08-01", costo_malificacion_kg: 180.0, peso_kg_unidad_venta: 1,
+      costo_malificacion_unidad: 180.0,
+      costo_final_unidad: 498.0, precio_venta_bruto: 1200.0, precio_venta_neto: 1008.40,
+      margen_mp_pct: 0.6845, margen_final_pct: 0.2661,
+      componentes_total: 4, componentes_sin_costo: 0,
+      estado_calidad: "OK", margen_minimo_oficial: 0.30, bajo_margen_minimo: true,
+      variacion_mp_monto: 23, variacion_mp_pct: 0.078, impacto_margen_pp: -1.9, origen: "PMM",
+    },
+    detalle: [
+      { cod_sku_ingrediente: "MP-001", desc_ingrediente: "Harina", cantidad: 0.6, uom_receta: "KG", costo_componente: 252.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-002", desc_ingrediente: "Levadura", cantidad: 0.01, uom_receta: "KG", costo_componente: 32.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-003", desc_ingrediente: "Sal", cantidad: 0.012, uom_receta: "KG", costo_componente: 2.16, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-004", desc_ingrediente: "Manteca", cantidad: 0.02, uom_receta: "KG", costo_componente: 32.0, origen: "PMM" },
+    ],
+    alertas: [
+      { tipo_alerta: "RECETA_DUPLICADA", detalle: 'Descripción "MARRAQUETA TRADICIONAL" repetida en 2 recetas vigentes' },
+      { tipo_alerta: "MARGEN_BAJO_MINIMO", detalle: "Margen final 26.6% bajo mínimo 30.0%" },
+      { tipo_alerta: "ALZA_MATERIA_PRIMA", detalle: "Costo MP +7.8% (-1.9 pts de margen)" },
+    ],
+  },
+
+  {
+    resumen: {
+      id_receta: 91002, cod_sku_receta: "PAN-1001", desc_receta: "MARRAQUETA TRADICIONAL",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PANAD", desc_tema: "Panadería",
+      costo_mp_total: 341.0, rendimiento_cantidad: 1.0, rendimiento_uom: "KG",
+      porciones_cantidad: 1, porciones_teoricas: 1,
+      costo_mp_por_kg: 341.0, unidad_venta: "KG", costo_mp_unidad_venta: 341.0,
+      periodo_malificacion: "2026-08-01", costo_malificacion_kg: 180.0, peso_kg_unidad_venta: 1,
+      costo_malificacion_unidad: 180.0,
+      costo_final_unidad: 521.0, precio_venta_bruto: 1150.0, precio_venta_neto: 966.39,
+      margen_mp_pct: 0.6472, margen_final_pct: 0.4608,
+      componentes_total: 4, componentes_sin_costo: 0,
+      estado_calidad: "OK", margen_minimo_oficial: 0.30, bajo_margen_minimo: false,
+      variacion_mp_monto: 0, variacion_mp_pct: 0, impacto_margen_pp: 0, origen: "PMM",
+    },
+    detalle: [
+      { cod_sku_ingrediente: "MP-001", desc_ingrediente: "Harina", cantidad: 0.62, uom_receta: "KG", costo_componente: 260.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-002", desc_ingrediente: "Levadura", cantidad: 0.012, uom_receta: "KG", costo_componente: 38.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-003", desc_ingrediente: "Sal", cantidad: 0.012, uom_receta: "KG", costo_componente: 2.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-004", desc_ingrediente: "Manteca", cantidad: 0.025, uom_receta: "KG", costo_componente: 40.0, origen: "PMM" },
+    ],
+    alertas: [
+      { tipo_alerta: "RECETA_DUPLICADA", detalle: 'Descripción "MARRAQUETA TRADICIONAL" repetida en 2 recetas vigentes' },
+    ],
+  },
+
+  {
+    resumen: {
+      id_receta: 92003, cod_sku_receta: "PAST-2002", desc_receta: "QUEQUE CHOCOLATE CAPRI",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PAST", desc_tema: "Pastelería",
+      costo_mp_total: 987.0, rendimiento_cantidad: 1, rendimiento_uom: "UN",
+      porciones_cantidad: 1, porciones_teoricas: 1,
+      costo_mp_por_kg: null, unidad_venta: "UN", costo_mp_unidad_venta: 987.0,
+      periodo_malificacion: "2026-08-01", costo_malificacion_kg: 2296.90, peso_kg_unidad_venta: 0.5,
+      costo_malificacion_unidad: 1148.45,
+      costo_final_unidad: 2135.45, precio_venta_bruto: 3990.0, precio_venta_neto: 3352.94,
+      margen_mp_pct: 0.7056, margen_final_pct: 0.3630,
+      componentes_total: 3, componentes_sin_costo: 0,
+      estado_calidad: "OK", margen_minimo_oficial: 0.30, bajo_margen_minimo: false,
+      variacion_mp_monto: 0, variacion_mp_pct: 0, impacto_margen_pp: 0, origen: "PMM",
+    },
+    detalle: [
+      { cod_sku_ingrediente: "MP-012", desc_ingrediente: "Bizcocho premezcla", cantidad: 0.25, uom_receta: "KG", costo_componente: 475.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-013", desc_ingrediente: "Chips chocolate", cantidad: 0.05, uom_receta: "KG", costo_componente: 260.0, origen: "PMM" },
+      { cod_sku_ingrediente: "MP-011", desc_ingrediente: "Mantequilla", cantidad: 0.06, uom_receta: "KG", costo_componente: 252.0, origen: "PMM" },
+    ],
+    alertas: [],
+  },
+
+  {
+    resumen: {
+      id_receta: 91050, cod_sku_receta: "PAST-9050", desc_receta: "TORTA PRESTIGIO 15P CP",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PAST", desc_tema: "Pastelería",
+      costo_mp_total: 4820.0, rendimiento_cantidad: 1, rendimiento_uom: "UN",
+      porciones_cantidad: 15, porciones_teoricas: null,
+      costo_mp_por_kg: null, unidad_venta: "UN", costo_mp_unidad_venta: 4820.0,
+      periodo_malificacion: "2026-08-01", costo_malificacion_kg: 1355.40, peso_kg_unidad_venta: null,
+      costo_malificacion_unidad: null,
+      costo_final_unidad: null, precio_venta_bruto: 9990.0, precio_venta_neto: 8394.96,
+      margen_mp_pct: 0.4258, margen_final_pct: null,
+      componentes_total: 6, componentes_sin_costo: 0,
+      estado_calidad: "SIN_PESO_PRODUCTO", margen_minimo_oficial: 0.30, bajo_margen_minimo: null,
+      variacion_mp_monto: 0, variacion_mp_pct: 0, impacto_margen_pp: 0, origen: "PMM",
+    },
+    detalle: [],
+    alertas: [
+      { tipo_alerta: "SIN_PESO_PRODUCTO", detalle: "No se puede convertir la malificación $/kg a costo unitario: falta peso/contenido del producto" },
+    ],
+  },
+
+  {
+    resumen: {
+      id_receta: 93012, cod_sku_receta: "PAST-3012", desc_receta: "EMPANADA COCTEL QUESO HOJALDRE 12 UND",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PAST", desc_tema: "Pastelería",
+      costo_mp_total: 2150.0, rendimiento_cantidad: 12, rendimiento_uom: "UN",
+      porciones_cantidad: 12, porciones_teoricas: 12,
+      costo_mp_por_kg: null, unidad_venta: "UN", costo_mp_unidad_venta: 2150.0,
+      periodo_malificacion: "2026-08-01", costo_malificacion_kg: 782.8333333333, peso_kg_unidad_venta: 0.6,
+      costo_malificacion_unidad: 469.70,
+      costo_final_unidad: 2619.70, precio_venta_bruto: 3490.0, precio_venta_neto: 2932.77,
+      margen_mp_pct: 0.2670, margen_final_pct: 0.1067,
+      componentes_total: 5, componentes_sin_costo: 0,
+      estado_calidad: "OK", margen_minimo_oficial: 0.30, bajo_margen_minimo: true,
+      variacion_mp_monto: 0, variacion_mp_pct: 0, impacto_margen_pp: 0, origen: "PMM",
+    },
+    detalle: [],
+    alertas: [
+      { tipo_alerta: "MARGEN_BAJO_MINIMO", detalle: "Margen final 10.7% bajo mínimo 30.0%" },
+    ],
+  },
+
+  {
+    resumen: {
+      id_receta: 93020, cod_sku_receta: "PAST-3020", desc_receta: "PACK CHAPARRITAS 2 UN",
+      division: "J06", desc_division: "PANADERIA Y PASTELERIA", cod_estado: 0,
+      ind_activo: "T", cod_tema: "PAST", desc_tema: "Pastelería",
+      costo_mp_total: 890.0, rendimiento_cantidad: 2, rendimiento_uom: "UN",
+      porciones_cantidad: 2, porciones_teoricas: 2,
+      costo_mp_por_kg: null, unidad_venta: "UN", costo_mp_unidad_venta: 890.0,
+      periodo_malificacion: null, costo_malificacion_kg: null, peso_kg_unidad_venta: null,
+      costo_malificacion_unidad: null,
+      costo_final_unidad: null, precio_venta_bruto: 2990.0, precio_venta_neto: 2512.61,
+      margen_mp_pct: 0.6458, margen_final_pct: null,
+      componentes_total: 4, componentes_sin_costo: 0,
+      estado_calidad: "SIN_MALIFICACION", margen_minimo_oficial: 0.30, bajo_margen_minimo: null,
+      variacion_mp_monto: 0, variacion_mp_pct: 0, impacto_margen_pp: null, origen: "PMM",
+    },
+    detalle: [],
+    alertas: [
+      { tipo_alerta: "SIN_MALIFICACION", detalle: "No existe cierre de malificación cargado" },
+    ],
+  },
+];
