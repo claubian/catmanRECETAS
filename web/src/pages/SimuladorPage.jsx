@@ -36,6 +36,11 @@ export default function SimuladorPage() {
         </div>
       </div>
 
+      <div className="info-note warn">
+        Las simulaciones son temporales y compartidas entre los usuarios de esta instancia.
+        Pueden perderse cuando el servicio se reinicia o se actualiza. No modifican los costos oficiales.
+      </div>
+
       {loading ? (
         <div className="center-loading">Cargando…</div>
       ) : error ? (

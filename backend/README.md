@@ -66,6 +66,12 @@ Malification upload remains in BigQuery and is intentionally not exposed as an
 API write. Simulation drafts are in-memory, are lost when the API restarts, and
 never update official cost tables.
 
-This local API has no corporate authentication. Keep it bound to localhost; do
-not expose it to a network or deploy it until the approved company auth layer
-and deployment controls are added.
+The application does not implement its own login. Local development must stay
+bound to localhost. Cloud Run deployment serves the compiled frontend together
+with the API and requires IAP for browser authentication; see the
+[deployment guide](../README.md). Never deploy with anonymous access.
+
+Set `WEB_DIST_DIR` to a Vite build directory to serve its `assets` and the
+frontend routes from FastAPI. The Docker image sets this automatically and
+uses the Cloud Run `PORT` environment variable. Simulation drafts remain
+shared, temporary in-memory data even when deployed.

@@ -5,10 +5,13 @@ import math
 import os
 from datetime import date, datetime
 from decimal import Decimal
+from pathlib import Path
 from typing import Any, Protocol
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 PROJECT_ID = os.getenv("BQ_PROJECT_ID", "tot-corp-planifcomer-cl-sbx")
 LOCATION = os.getenv("BQ_LOCATION", "US")
@@ -566,6 +569,20 @@ def create_app(repository: Repository | None = None) -> FastAPI:
         }
         app.state.simulaciones.append(simulation)
         return simulation
+
+    web_dist = os.getenv("WEB_DIST_DIR")
+    if web_dist:
+        dist = Path(web_dist).resolve()
+        if not (dist / "index.html").is_file() or not (dist / "assets").is_dir():
+            raise RuntimeError("WEB_DIST_DIR debe contener el build de Vite (index.html y assets).")
+        app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
+
+        @app.get("/", include_in_schema=False)
+        @app.get("/simulador", include_in_schema=False)
+        @app.get("/alertas", include_in_schema=False)
+        @app.get("/carga-masiva", include_in_schema=False)
+        def frontend() -> FileResponse:
+            return FileResponse(dist / "index.html", headers={"Cache-Control": "no-cache"})
 
     return app
 
