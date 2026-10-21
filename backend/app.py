@@ -109,12 +109,37 @@ class BigQueryRepository:
           )
           QUALIFY ROW_NUMBER() OVER (PARTITION BY ID_SKU ORDER BY COD_DIVISION) = 1
         )
-        SELECT
-          r.*,
+                , ultima_malificacion AS (
+                    SELECT id_receta, periodo, costo_malificacion_kg
+                    FROM `{self.project_id}.{DATASET_PRD}.fact_malificacion`
+                    WHERE es_vigente
+                        AND periodo <= CURRENT_DATE('America/Santiago')
+                    QUALIFY ROW_NUMBER() OVER (
+                        PARTITION BY id_receta
+                        ORDER BY periodo DESC, version_carga DESC, cargado_en DESC
+                    ) = 1
+                )
+                SELECT
+                    r.* REPLACE (
+                        m.periodo AS periodo_malificacion,
+                        m.costo_malificacion_kg AS costo_malificacion_kg,
+                        m.costo_malificacion_kg * r.peso_kg_unidad_venta AS costo_malificacion_unidad
+                    ),
           d.COD_DIVISION AS division,
           d.DESC_DIVISION AS desc_division,
+                    p.uom_venta AS uom_venta_producto,
+                    (
+                        STARTS_WITH(UPPER(TRIM(p.desc_sku)), 'BASE ')
+                        AND EXISTS (
+                            SELECT 1
+                            FROM `{self.project_id}.{DATASET_VW}.vw_detalle_receta_vigente` AS uso
+                            WHERE uso.id_ingrediente = r.id_receta
+                                AND uso.tipo_ingrediente = 'SUBRECETA'
+                        )
+                    ) AS es_intermedia,
           p.ind_receta
         FROM `{self.project_id}.{DATASET_VW}.vw_costo_receta_vigente` AS r
+        LEFT JOIN ultima_malificacion AS m ON m.id_receta = r.id_receta
         JOIN division_sku AS d ON d.ID_SKU = r.id_receta
         JOIN `{self.project_id}.{DATASET_VW}.vw_stg_producto` AS p
           ON p.id_producto = r.id_receta
@@ -229,6 +254,37 @@ class BigQueryRepository:
         return rows[0] if rows else {}
 
 
+def _apply_malification_basis(summary: dict[str, Any]) -> None:
+    unit = str(summary.get("uom_venta_producto") or "").upper()
+    amount = summary.get("costo_malificacion_kg")
+    summary["costo_malificacion_origen"] = amount
+    summary["base_malificacion"] = "KG"
+    if summary.get("es_intermedia"):
+        portions = summary.get("porciones_cantidad")
+        divisor = portions if portions is not None and portions > 0 else None
+        summary["base_malificacion"] = "LOTE_POR_PORCIONES"
+        summary["unidad_venta"] = "PORCION"
+    elif unit in {"UN", "UNID", "UND"}:
+        summary["base_malificacion"] = "UNIDAD_VENTA"
+        summary["unidad_venta"] = "UNIDAD"
+        quantity = summary.get("rendimiento_cantidad")
+        yield_unit = str(summary.get("rendimiento_uom") or "").upper()
+        divisor = quantity if quantity is not None and quantity > 0 and yield_unit in {"UN", "UNID", "UND"} else None
+    else:
+        return
+    total = summary.get("costo_mp_total")
+    summary["costo_mp_unidad_venta"] = total / divisor if total is not None and divisor else None
+    summary["costo_malificacion_unidad"] = (
+        amount / divisor if amount is not None and divisor else None
+    ) if summary.get("es_intermedia") else amount
+    net_price = summary.get("precio_venta_neto")
+    mp_cost = summary["costo_mp_unidad_venta"]
+    summary["margen_mp_pct"] = (
+        (net_price - mp_cost) / net_price
+        if net_price is not None and net_price > 0 and mp_cost is not None else None
+    )
+
+
 def _assemble_recetas(
     resumenes: list[dict[str, Any]],
     detalles: list[dict[str, Any]],
@@ -236,12 +292,37 @@ def _assemble_recetas(
 ) -> list[dict[str, Any]]:
     by_id: dict[int, dict[str, Any]] = {}
     for summary in resumenes:
+        _apply_malification_basis(summary)
         recipe_id = int(summary["id_receta"])
         quality = summary.get("estado_calidad")
-        if quality != "OK":
+        missing_malification = summary.get("periodo_malificacion") is None
+        mp_cost = summary.get("costo_mp_unidad_venta")
+        incomplete = (summary.get("componentes_sin_costo") or 0) > 0 or mp_cost is None
+        if incomplete:
+            quality = "INCOMPLETO"
+        elif missing_malification:
+            quality = "SIN_MALIFICACION"
+            summary["costo_final_unidad"] = mp_cost
+        elif summary.get("costo_malificacion_unidad") is None:
+            quality = "SIN_PESO_PRODUCTO"
+        else:
+            summary["costo_final_unidad"] = mp_cost + summary["costo_malificacion_unidad"]
+            net_price = summary.get("precio_venta_neto")
+            quality = "OK" if net_price is not None and net_price > 0 else "SIN_PRECIO"
+            if quality == "OK":
+                margin = (net_price - summary["costo_final_unidad"]) / net_price
+                summary["margen_final_pct"] = margin
+                threshold = summary.get("margen_minimo_oficial")
+                summary["bajo_margen_minimo"] = margin < threshold if threshold is not None else None
+        summary["estado_calidad"] = quality
+        if quality != "OK" or summary.get("es_intermedia"):
             summary["margen_final_pct"] = None
             summary["bajo_margen_minimo"] = None
-        if quality in {"INCOMPLETO", "SIN_MALIFICACION", "SIN_PESO_PRODUCTO"}:
+        if summary.get("es_intermedia"):
+            summary["margen_mp_pct"] = None
+        if quality == "SIN_MALIFICACION":
+            summary["costo_final_unidad"] = summary.get("costo_mp_unidad_venta")
+        if quality in {"INCOMPLETO", "SIN_PESO_PRODUCTO"}:
             summary["costo_final_unidad"] = None
         by_id[recipe_id] = {"resumen": summary, "detalle": [], "alertas": []}
     for detail in detalles:
@@ -252,10 +333,24 @@ def _assemble_recetas(
         recipe = by_id.get(int(alert["id_receta"]))
         if recipe:
             if (
-                alert.get("tipo_alerta") == "MARGEN_BAJO_MINIMO"
-                and recipe["resumen"].get("estado_calidad") != "OK"
+                alert.get("tipo_alerta") == "SIN_PESO_PRODUCTO"
+                and (
+                    recipe["resumen"].get("periodo_malificacion") is None
+                    or recipe["resumen"].get("costo_malificacion_unidad") is not None
+                )
             ):
                 continue
+            if alert.get("tipo_alerta") == "MARGEN_BAJO_MINIMO":
+                summary = recipe["resumen"]
+                if summary.get("bajo_margen_minimo") is not True:
+                    continue
+                alert = {
+                    **alert,
+                    "detalle": (
+                        f"Margen final {summary['margen_final_pct'] * 100:.1f}% "
+                        f"bajo minimo {summary['margen_minimo_oficial'] * 100:.1f}%"
+                    ),
+                }
             recipe["alertas"].append(
                 {
                     **alert,

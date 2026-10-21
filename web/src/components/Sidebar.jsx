@@ -67,6 +67,7 @@ export default function Sidebar({ alertCount }) {
       <div className="brand">
         Recetas<span>.</span>BI
       </div>
+      <div className="brand-area">Inteligencia Comercial</div>
       <div className="brand-sub">Panadería · Pastelería · Platos Preparados</div>
 
       {items.map((it) => (

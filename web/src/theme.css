@@ -26,6 +26,7 @@ button,input,select,textarea{font-family:inherit;}
 .sidebar{background:var(--primary);color:#fff;padding:28px 16px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .brand{font-weight:800;font-size:22px;color:#fff;letter-spacing:-.01em;}
 .brand span{color:var(--highlight);}
+.brand-area{color:#fff;font-size:12px;font-weight:600;letter-spacing:0;line-height:1.5;max-width:100%;}
 .brand-sub{font-size:11px;color:var(--accent);margin:4px 0 26px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;line-height:1.5;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#d7ead9;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;border-left:3px solid transparent;}
 .nav-item svg{width:17px;height:17px;flex-shrink:0;}
@@ -170,6 +171,7 @@ button,input,select,textarea{font-family:inherit;}
   .app{grid-template-columns:1fr;}
   .sidebar{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:14px 16px;}
   .brand-sub,.sidebar-foot{display:none;}
+  .brand-area{flex-basis:100%;}
   .brand{margin-right:12px;}
   .main{padding:20px 16px 48px;}
   .kpis{grid-template-columns:repeat(2,1fr);}

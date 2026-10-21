@@ -13,7 +13,6 @@ const QUALITY_LABELS = {
 
 const FINAL_COST_UNAVAILABLE = new Set([
   "INCOMPLETO",
-  "SIN_MALIFICACION",
   "SIN_PESO_PRODUCTO",
 ]);
 
@@ -36,6 +35,13 @@ export default function RecipeCard({ receta, dupCount, isSimulation }) {
     s.costo_malificacion_kg == null
   );
   const malificacionKg = s.costo_malificacion_kg;
+  const malificacionBasis = s.base_malificacion || "KG";
+  const malificacionUnit = malificacionBasis === "LOTE_POR_PORCIONES"
+    ? "porción"
+    : malificacionBasis === "UNIDAD_VENTA" ? "unidad vendida" : "kg";
+  const malificacionDescription = malificacionBasis === "LOTE_POR_PORCIONES"
+    ? `Importe del lote ${fmt(s.costo_malificacion_origen)} dividido entre ${s.porciones_cantidad ?? "sin dato de"} porciones`
+    : `Importe informado por ${malificacionUnit}`;
   const hasFinalCost = !FINAL_COST_UNAVAILABLE.has(quality) && quality !== "SIMULACION" && s.costo_final_unidad != null;
   const hasFinalMargin = hasFinalCost && s.margen_final_pct != null && quality !== "SIN_PRECIO";
   const isDup = dupCount > 1;
@@ -72,6 +78,9 @@ export default function RecipeCard({ receta, dupCount, isSimulation }) {
   if (isDegraded) {
     badgeLabel = QUALITY_LABELS[quality] || "Costeo incompleto";
     badgeCls = "degraded";
+  } else if (s.es_intermedia) {
+    badgeLabel = "Receta intermedia";
+    badgeCls = "na";
   } else if (isLow) {
     badgeLabel = "Bajo margen";
     badgeCls = "low";
@@ -107,14 +116,14 @@ export default function RecipeCard({ receta, dupCount, isSimulation }) {
         </div>
         <div className="row-metric">
           <span>
-            Malificación
+            Malificación{malificacionBasis === "LOTE_POR_PORCIONES" ? " por porción" : ""}
             {!malificacionMissing && s.periodo_malificacion && (
               <span
                 className="src-tag src-pmm"
                 style={{ marginLeft: 6 }}
-                title={`Valor informado por kg, periodo ${s.periodo_malificacion}`}
+                title={`${malificacionDescription}, periodo ${s.periodo_malificacion}`}
               >
-                $/kg
+                {s.periodo_malificacion.slice(0, 7)} · $/{malificacionUnit}
               </span>
             )}
           </span>
@@ -129,19 +138,19 @@ export default function RecipeCard({ receta, dupCount, isSimulation }) {
           </b>
         </div>
         <div className="row-metric total">
-          <span>{quality === "SIMULACION" ? "Costo final estimado (sin malificación)" : "Costo final (sin IVA)"}</span>
+          <span>{quality === "SIMULACION" ? "Costo final estimado (sin malificación)" : malificacionMissing ? "Costo final sin malificación (sin IVA)" : "Costo final (sin IVA)"}</span>
           <b className={hasFinalCost ? "" : "not-available"}>
             {hasFinalCost ? fmt(s.costo_final_unidad) : "No disponible"}
           </b>
         </div>
-        <div className="row-metric">
+        {!s.es_intermedia && <div className="row-metric">
           <span>Precio de venta (con IVA)</span>
           <b>{fmt(s.precio_venta_bruto)}</b>
-        </div>
-        <div className="row-metric">
+        </div>}
+        {!s.es_intermedia && <div className="row-metric">
           <span>{quality === "SIMULACION" ? "Margen final estimado" : "Margen final (sobre neto)"}</span>
           <b>{hasFinalMargin ? fmtPct(s.margen_final_pct) : "No disponible"}</b>
-        </div>
+        </div>}
         {!hasFinalMargin && s.margen_mp_pct != null && (
           <div className="row-metric">
             <span>{quality === "SIMULACION" ? "Margen MP estimado" : "Margen solo MP (referencial)"}</span>

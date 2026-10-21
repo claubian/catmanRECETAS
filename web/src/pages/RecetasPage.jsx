@@ -81,8 +81,7 @@ export default function RecetasPage() {
           <h1>Dashboard de Recetas</h1>
           <p>
             Recetas de Panadería y Pastelería (J06) y Platos Preparados (J07). La formulación,
-            los costos y las alertas vienen del modelo BigQuery; la malificación se consulta como
-            costo por kilogramo y no se carga desde esta pantalla.
+            los costos y las alertas vienen del modelo BigQuery.
           </p>
         </div>
         <div className="actions">
@@ -198,15 +197,15 @@ export default function RecetasPage() {
       {showMalif && (
         <div className="panel">
           <div className="panel-head">
-            <h2>Malificación del modelo ($/kg)</h2>
+            <h2>Malificación del modelo</h2>
             <button className="panel-close" onClick={() => setShowMalif(false)}>
               ✕ Cerrar
             </button>
           </div>
           <p className="sub">
-            El modelo conserva el valor por kilogramo y lo convierte a costo por unidad de venta
-            usando el peso disponible. Una fila con valor cero no es lo mismo que una malificación
-            sin fila aplicable.
+            Último cierre disponible por receta. Las bases se distribuyen por porciones;
+            los productos finales por unidad reciben el importe por unidad vendida.
+            Los costos por kg se convierten usando el peso.
           </p>
           <div className="row-metric">
             <span>Recetas con malificación vigente en la tabla</span>
@@ -234,7 +233,7 @@ export default function RecetasPage() {
                   <th>SKU</th>
                   <th>Receta</th>
                   <th>Periodo</th>
-                  <th style={{ textAlign: "right" }}>Costo ($/kg)</th>
+                  <th style={{ textAlign: "right" }}>Importe de origen</th>
                   <th style={{ textAlign: "right" }}>Costo unitario</th>
                   <th>Estado</th>
                 </tr>
